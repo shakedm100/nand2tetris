@@ -41,5 +41,37 @@ CHIP ALU {
         ng;      // if (out < 0)  equals 1, else 0
 
     PARTS:
-    //// Replace this comment with your code.
+	//Zero X and then Not X
+	Mux16(a=x, b=false, sel=zx, out=afterZeroX);
+	Not16(in=afterZeroX, out=afterNotX);
+	Mux16(a=afterZeroX, b=afterNotX, sel=nx, out=finishedX);
+	
+	//Zero Y and then not Y
+	Mux16(a=y, b=false, sel=zy, out=afterZeroY);
+	Not16(in=afterZeroY, out=afterNotY);
+	Mux16(a=afterZeroY, b=afterNotY, sel=ny, out=finishedY);
+	
+	//Check f flag
+	Add16(a=finishedX, b=finishedY, out=xPlusy);
+	And16(a=finishedX, b=finishedY, out=xAndy);
+	Mux16(a=xAndy, b=xPlusy, sel=f, out=afterF);
+	
+	//Check no flag
+	Not16(in=afterF, out=notAfterF);
+	Mux16(a=afterF, b=notAfterF, sel=no, out[15]=checkNG, out[0..14]=dontcare);
+	Mux16(a=afterF, b=notAfterF, sel=no, out[0..7]=lower, out[8..15]=higher);
+
+	//Check ng flag
+	Mux(a=false, b=true, sel=checkNG, out=ng);
+	
+	//Check zr flag
+	Or8Way(in=lower, out=checkLower);
+	Or8Way(in=higher, out=checkHigher);
+	Or(a=checkLower, b=checkHigher, out=notZR);
+	//If there is 1 in the output the flag needs to be 0,
+	//So it is the opposite of the Or
+	Not(in=notZR, out=zr);
+	
+	//Output
+	Mux16(a=afterF, b=notAfterF, sel=no, out=out);
 }

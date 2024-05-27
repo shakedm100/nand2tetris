@@ -14,5 +14,18 @@ CHIP PC {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+	
+	//Take care of inc16
+	Inc16(in=loop, out=afterInc);
+	Mux16(a=loop, b=afterInc, sel=inc, out=afterMuxInc);
+	
+	//Now load
+	Mux16(a=afterMuxInc, b=in, sel=load, out=afterLoad);
+	
+	//And finally reset
+	Mux16(a=afterLoad, b=false, sel=reset, out=afterReset);
+
+	//Load is true because I take care of it's value
+	//In the previous Mux16
+	Register(in=afterReset, load=true,out=loop ,out=out);
 }
