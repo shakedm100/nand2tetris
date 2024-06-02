@@ -32,8 +32,13 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-	Mux16(a=false, b=instruction, sel=instruction[15], out=afterMux, out[0..2]=jump, out[3..5]=dest, out[6..12]=comp);
+	Mux16(a=outM, b=instruction, sel=instruction[15], out=afterMux, out[0..2]=jump, out[3..5]=dest, out[6..12]=comp);
 	Register(in=afterMux, load=instruction[3], out=ARegister);
+	
+	//ALU
+	Register(in=outM ,load= ,out=DRegister);
+	Mux16(a=inM, b=ARegister, sel=instruction[15], out=memoryOrA);
+	ALU(x=DRegister ,y=memoryOrA ,zx= ,nx= ,zy= ,ny= ,f= ,no= ,out=outM ,zr= ,ng= );
 	
 	//Check if going to jump
 	Or(a=jump[0], b=jump[1], out=firstAND);
@@ -41,7 +46,5 @@ CHIP CPU {
 	Not(in=ifJump, out=checkJump);
 	
 	//If checkJump==0 don't jump and inc++
-	PC(in=ARegister, inc=checkJump ,load= ,reset=reset, out=pc);
-	
-	Mux16(a=ARegister, b=inM, sel=instruction[11], out=aluEntry
+	PC(in=ARegister, inc=checkJump ,load=instruction[15] ,reset=reset, out=pc);
 }
