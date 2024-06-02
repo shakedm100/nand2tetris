@@ -31,8 +31,8 @@
 
 (PAINT)
 	
-	//Stopping condition when i - 8191 == 0
-	@8191
+	//Stopping condition when i - 8192 == 0
+	@8192
 	D=A
 	@i
 	D=M-D
